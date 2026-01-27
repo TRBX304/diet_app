@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#FF8C42">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>ダイエット記録</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #FF8C42;
+      --primary-light: #FFB380;
+      --primary-dark: #E67530;
+      --secondary: #4ECDC4;
+      --secondary-light: #7EDDD6;
+      --bg: #FFF9F5;
+      --card: #FFFFFF;
+      --text: #2D3436;
+      --text-light: #636E72;
+      --border: #E8E8E8;
+      --success: #00B894;
+      --warning: #FDCB6E;
+      --danger: #E17055;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(255, 140, 66, 0.3);
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .header .date {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    /* Streak Banner */
+    .streak-banner {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 15px;
+      background: white;
+      margin: 15px;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .streak-item {
+      text-align: center;
+    }
+
+    .streak-item .icon {
+      font-size: 1.5rem;
+      margin-bottom: 4px;
+    }
+
+    .streak-item .count {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .streak-item .label {
+      font-size: 0.75rem;
+      color: var(--text-light);
+    }
+
+    .streak-item .best {
+      font-size: 0.7rem;
+      color: var(--secondary);
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      background: white;
+      margin: 0 15px;
+      border-radius: 12px;
+      padding: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .nav-tab {
+      flex: 1;
+      padding: 12px 8px;
+      text-align: center;
+      border: none;
+      background: none;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      cursor: pointer;
+      border-radius: 10px;
+      transition: all 0.2s;
+    }
+
+    .nav-tab.active {
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+    }
+
+    .nav-tab .tab-icon {
+      display: block;
+      font-size: 1.2rem;
+      margin-bottom: 2px;
+    }
+
+    /* Content Sections */
+    .section {
+      display: none;
+      padding: 15px;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title .icon {
+      font-size: 1.2rem;
+    }
+
+    /* Input Groups */
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-bottom: 6px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .input-row .input-group {
+      flex: 1;
+    }
+
+    /* Meal Inputs */
+    .meal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .meal-item {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .meal-item label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-bottom: 6px;
+    }
+
+    .meal-item input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .meal-item input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .calorie-total {
+      text-align: center;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      border-radius: 12px;
+      color: white;
+      margin-top: 15px;
+    }
+
+    .calorie-total .value {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .calorie-total .target {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+
+    /* Exercise Checkboxes */
+    .exercise-options {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .exercise-check {
+      flex: 1;
+      position: relative;
+    }
+
+    .exercise-check input {
+      display: none;
+    }
+
+    .exercise-check label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .exercise-check input:checked + label {
+      background: var(--secondary-light);
+      border-color: var(--secondary);
+    }
+
+    .exercise-check .check-icon {
+      font-size: 1.5rem;
+      margin-bottom: 4px;
+    }
+
+    .exercise-check .check-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    /* Running Details */
+    .running-details {
+      display: none;
+      padding: 15px;
+      background: var(--bg);
+      border-radius: 12px;
+      margin-top: 10px;
+    }
+
+    .running-details.show {
+      display: block;
+    }
+
+    .running-calc {
+      text-align: center;
+      margin-top: 10px;
+      padding: 10px;
+      background: var(--secondary-light);
+      border-radius: 8px;
+      color: var(--text);
+    }
+
+    .running-calc .value {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    /* Workout Note */
+    .workout-note {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .workout-note.show {
+      display: block;
+    }
+
+    .workout-note textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 0.9rem;
+      resize: none;
+      height: 80px;
+    }
+
+    .workout-note textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Buttons */
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.2s;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: 0 4px 12px rgba(255, 140, 66, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+      border: 2px solid var(--border);
+    }
+
+    .btn-small {
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      width: auto;
+      display: inline-block;
+    }
+
+    /* Graph Container */
+    .graph-container {
+      background: white;
+      border-radius: 16px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .graph-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .graph-tab {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: var(--bg);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .graph-tab.active {
+      background: var(--secondary);
+      color: white;
+    }
+
+    .graph-canvas {
+      width: 100%;
+      height: 200px;
+    }
+
+    /* History List */
+    .history-list {
+      list-style: none;
+    }
+
+    .history-item {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .history-date {
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    .history-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    .history-stat {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Settings */
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+
+    .setting-label {
+      font-size: 0.95rem;
+    }
+
+    .setting-value input {
+      width: 100px;
+      padding: 8px 12px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      text-align: right;
+      font-size: 1rem;
+    }
+
+    .setting-value input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Backup Section */
+    .backup-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .backup-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .backup-buttons .btn {
+      flex: 1;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--text);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-light);
+    }
+
+    .empty-state .icon {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>🌟 ダイエット記録</h1>
+    <div class="date" id="currentDate"></div>
+  </header>
+
+  <div class="streak-banner">
+    <div class="streak-item">
+      <div class="icon">🔥</div>
+      <div class="count" id="exerciseStreak">0</div>
+      <div class="label">運動連続</div>
+      <div class="best" id="exerciseBest">最長: 0日</div>
+    </div>
+    <div class="streak-item">
+      <div class="icon">⚖️</div>
+      <div class="count" id="weightChange">±0</div>
+      <div class="label">体重変化</div>
+      <div class="best" id="startWeight">開始: --kg</div>
+    </div>
+  </div>
+
+  <nav class="nav-tabs">
+    <button class="nav-tab active" data-tab="record">
+      <span class="tab-icon">📝</span>
+      記録
+    </button>
+    <button class="nav-tab" data-tab="graph">
+      <span class="tab-icon">📊</span>
+      グラフ
+    </button>
+    <button class="nav-tab" data-tab="history">
+      <span class="tab-icon">📅</span>
+      履歴
+    </button>
+    <button class="nav-tab" data-tab="settings">
+      <span class="tab-icon">⚙️</span>
+      設定
+    </button>
+  </nav>
+
+  <!-- Record Section -->
+  <section class="section active" id="record">
+    <div class="card">
+      <h2 class="card-title"><span class="icon">⚖️</span>体重</h2>
+      <div class="input-group">
+        <label>今日の体重 (kg)</label>
+        <input type="number" id="weightInput" step="0.1" placeholder="例: 70.5">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title"><span class="icon">🍽️</span>食事カロリー</h2>
+      <div class="meal-grid">
+        <div class="meal-item">
+          <label>🌅 朝食</label>
+          <input type="number" id="breakfastInput" placeholder="kcal">
+        </div>
+        <div class="meal-item">
+          <label>☀️ 昼食</label>
+          <input type="number" id="lunchInput" placeholder="kcal">
+        </div>
+        <div class="meal-item">
+          <label>🌙 夕食</label>
+          <input type="number" id="dinnerInput" placeholder="kcal">
+        </div>
+        <div class="meal-item">
+          <label>🍪 間食</label>
+          <input type="number" id="snackInput" placeholder="kcal">
+        </div>
+      </div>
+      <div class="calorie-total">
+        <div class="value"><span id="totalCalories">0</span> kcal</div>
+        <div class="target">目標: <span id="targetCaloriesDisplay">-</span> kcal</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title"><span class="icon">🏋️</span>今日の運動</h2>
+      <div class="exercise-options">
+        <div class="exercise-check">
+          <input type="checkbox" id="runningCheck">
+          <label for="runningCheck">
+            <span class="check-icon">🏃</span>
+            <span class="check-label">ランニング</span>
+          </label>
+        </div>
+        <div class="exercise-check">
+          <input type="checkbox" id="workoutCheck">
+          <label for="workoutCheck">
+            <span class="check-icon">💪</span>
+            <span class="check-label">筋トレ</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="running-details" id="runningDetails">
+        <div class="input-group">
+          <label>走行距離 (km)</label>
+          <input type="number" id="runDistanceInput" step="0.1" placeholder="例: 5.0">
+        </div>
+        <div class="running-calc">
+          消費カロリー: <span class="value" id="runCalories">0</span> kcal
+        </div>
+      </div>
+
+      <div class="workout-note" id="workoutNote">
+        <textarea id="workoutNoteInput" placeholder="筋トレ内容をメモ（任意）&#10;例: 腕立て30回、スクワット50回"></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="saveBtn">💾 記録を保存</button>
+  </section>
+
+  <!-- Graph Section -->
+  <section class="section" id="graph">
+    <div class="graph-container">
+      <div class="graph-tabs">
+        <button class="graph-tab active" data-graph="weight">体重推移</button>
+        <button class="graph-tab" data-graph="calories">カロリー推移</button>
+      </div>
+      <canvas class="graph-canvas" id="graphCanvas"></canvas>
+    </div>
+  </section>
+
+  <!-- History Section -->
+  <section class="section" id="history">
+    <ul class="history-list" id="historyList"></ul>
+  </section>
+
+  <!-- Settings Section -->
+  <section class="section" id="settings">
+    <div class="card">
+      <h2 class="card-title"><span class="icon">🎯</span>目標設定</h2>
+      <div class="setting-item">
+        <span class="setting-label">目標体重 (kg)</span>
+        <div class="setting-value">
+          <input type="number" id="targetWeightInput" step="0.1">
+        </div>
+      </div>
+      <div class="setting-item">
+        <span class="setting-label">目標カロリー (kcal)</span>
+        <div class="setting-value">
+          <input type="number" id="targetCaloriesInput">
+        </div>
+      </div>
+      <div class="setting-item">
+        <span class="setting-label">開始時の体重 (kg)</span>
+        <div class="setting-value">
+          <input type="number" id="startWeightInput" step="0.1">
+        </div>
+      </div>
+      <div class="setting-item">
+        <span class="setting-label">現在の体重 (kg)</span>
+        <div class="setting-value">
+          <input type="number" id="currentWeightInput" step="0.1">
+        </div>
+      </div>
+      <button class="btn btn-secondary" id="saveSettingsBtn" style="margin-top: 15px;">設定を保存</button>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title"><span class="icon">💾</span>データ管理</h2>
+      <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 10px;">バックアップ用JSONデータ</p>
+      <textarea id="backupTextarea" style="width: 100%; height: 150px; padding: 10px; border: 2px solid var(--border); border-radius: 12px; font-size: 0.8rem; font-family: monospace; resize: vertical;"></textarea>
+      <div class="backup-buttons" style="margin-top: 10px;">
+        <button class="btn btn-secondary" id="exportBtn">📤 表示</button>
+        <button class="btn btn-secondary" id="copyBtn">📋 コピー</button>
+        <button class="btn btn-secondary" id="importBtn">📥 復元</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // Data Management
+    const STORAGE_KEY = 'dietAppData';
+
+    const defaultData = {
+      settings: {
+        targetWeight: 65,
+        targetCalories: 1800,
+        currentWeight: 70,
+        startWeight: null
+      },
+      streaks: {
+        exercise: { current: 0, best: 0 }
+      },
+      records: {}
+    };
+
+    let appData = loadData();
+
+    function loadData() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      } catch (e) {
+        console.error('Failed to load data:', e);
+      }
+      return { ...defaultData };
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+      } catch (e) {
+        console.error('Failed to save data:', e);
+      }
+    }
+
+    // Utility Functions
+    function getToday() {
+      const now = new Date();
+      return now.toISOString().split('T')[0];
+    }
+
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      const options = { month: 'long', day: 'numeric', weekday: 'short' };
+      return date.toLocaleDateString('ja-JP', options);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // Streak Calculation
+    function calculateStreaks() {
+      const dates = Object.keys(appData.records).sort().reverse();
+      let exerciseStreak = 0;
+      let counting = true;
+
+      const today = getToday();
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+      for (let i = 0; i < dates.length && counting; i++) {
+        const date = dates[i];
+        const record = appData.records[date];
+
+        // Check if date is consecutive
+        let expectedDate;
+        if (i === 0) {
+          if (date !== today && date !== yesterdayStr) {
+            break;
+          }
+          expectedDate = date;
+        } else {
+          const prevDate = new Date(dates[i - 1]);
+          prevDate.setDate(prevDate.getDate() - 1);
+          expectedDate = prevDate.toISOString().split('T')[0];
+        }
+
+        if (date !== expectedDate && i > 0) {
+          break;
+        }
+
+        // Count if either running or workout was done
+        if (record.exercise?.running || record.exercise?.workout) {
+          exerciseStreak++;
+        } else {
+          counting = false;
+        }
+      }
+
+      // Initialize streaks if not exist
+      if (!appData.streaks.exercise) {
+        appData.streaks.exercise = { current: 0, best: 0 };
+      }
+
+      appData.streaks.exercise.current = exerciseStreak;
+      if (exerciseStreak > appData.streaks.exercise.best) {
+        appData.streaks.exercise.best = exerciseStreak;
+      }
+
+      saveData();
+      updateStreakDisplay();
+    }
+
+    function updateStreakDisplay() {
+      document.getElementById('exerciseStreak').textContent = appData.streaks.exercise?.current || 0;
+      document.getElementById('exerciseBest').textContent = `最長: ${appData.streaks.exercise?.best || 0}日`;
+
+      // Weight change calculation
+      const startWeight = appData.settings.startWeight;
+      const currentWeight = appData.settings.currentWeight;
+
+      if (startWeight && currentWeight) {
+        const change = currentWeight - startWeight;
+        const sign = change > 0 ? '+' : '';
+        const changeText = `${sign}${change.toFixed(1)}`;
+        document.getElementById('weightChange').textContent = changeText;
+        document.getElementById('weightChange').style.color = change < 0 ? '#00B894' : change > 0 ? '#E17055' : 'var(--primary)';
+      } else {
+        document.getElementById('weightChange').textContent = '±0';
+      }
+
+      document.getElementById('startWeight').textContent = startWeight ? `開始: ${startWeight}kg` : '開始: --kg';
+    }
+
+    // Tab Navigation
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+
+        if (tab.dataset.tab === 'graph') {
+          drawGraph('weight');
+        } else if (tab.dataset.tab === 'history') {
+          renderHistory();
+        }
+      });
+    });
+
+    // Graph Tabs
+    document.querySelectorAll('.graph-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.graph-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        drawGraph(tab.dataset.graph);
+      });
+    });
+
+    // Exercise Toggle
+    document.getElementById('runningCheck').addEventListener('change', (e) => {
+      document.getElementById('runningDetails').classList.toggle('show', e.target.checked);
+    });
+
+    document.getElementById('workoutCheck').addEventListener('change', (e) => {
+      document.getElementById('workoutNote').classList.toggle('show', e.target.checked);
+    });
+
+    // Calorie Calculation
+    function updateTotalCalories() {
+      const breakfast = parseInt(document.getElementById('breakfastInput').value) || 0;
+      const lunch = parseInt(document.getElementById('lunchInput').value) || 0;
+      const dinner = parseInt(document.getElementById('dinnerInput').value) || 0;
+      const snack = parseInt(document.getElementById('snackInput').value) || 0;
+      const total = breakfast + lunch + dinner + snack;
+      document.getElementById('totalCalories').textContent = total;
+    }
+
+    ['breakfastInput', 'lunchInput', 'dinnerInput', 'snackInput'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateTotalCalories);
+    });
+
+    // Running Calorie Calculation
+    document.getElementById('runDistanceInput').addEventListener('input', (e) => {
+      const distance = parseFloat(e.target.value) || 0;
+      const weight = appData.settings.currentWeight || 70;
+      const calories = Math.round(weight * distance * 1.05);
+      document.getElementById('runCalories').textContent = calories;
+    });
+
+    // Save Record
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      const today = getToday();
+      const record = {
+        weight: parseFloat(document.getElementById('weightInput').value) || null,
+        meals: {
+          breakfast: parseInt(document.getElementById('breakfastInput').value) || 0,
+          lunch: parseInt(document.getElementById('lunchInput').value) || 0,
+          dinner: parseInt(document.getElementById('dinnerInput').value) || 0,
+          snack: parseInt(document.getElementById('snackInput').value) || 0
+        },
+        exercise: {
+          running: document.getElementById('runningCheck').checked,
+          runDistance: parseFloat(document.getElementById('runDistanceInput').value) || 0,
+          runCalories: parseInt(document.getElementById('runCalories').textContent) || 0,
+          workout: document.getElementById('workoutCheck').checked,
+          workoutNote: document.getElementById('workoutNoteInput').value
+        }
+      };
+
+      appData.records[today] = record;
+
+      // Update current weight if weight was recorded
+      if (record.weight) {
+        appData.settings.currentWeight = record.weight;
+      }
+
+      saveData();
+      calculateStreaks();
+      showToast('記録を保存しました！');
+    });
+
+    // Load Today's Record
+    function loadTodayRecord() {
+      const today = getToday();
+      const record = appData.records[today];
+
+      if (record) {
+        if (record.weight) document.getElementById('weightInput').value = record.weight;
+        if (record.meals) {
+          document.getElementById('breakfastInput').value = record.meals.breakfast || '';
+          document.getElementById('lunchInput').value = record.meals.lunch || '';
+          document.getElementById('dinnerInput').value = record.meals.dinner || '';
+          document.getElementById('snackInput').value = record.meals.snack || '';
+        }
+        if (record.exercise) {
+          document.getElementById('runningCheck').checked = record.exercise.running;
+          document.getElementById('workoutCheck').checked = record.exercise.workout;
+          if (record.exercise.running) {
+            document.getElementById('runningDetails').classList.add('show');
+            document.getElementById('runDistanceInput').value = record.exercise.runDistance || '';
+            document.getElementById('runCalories').textContent = record.exercise.runCalories || 0;
+          }
+          if (record.exercise.workout) {
+            document.getElementById('workoutNote').classList.add('show');
+            document.getElementById('workoutNoteInput').value = record.exercise.workoutNote || '';
+          }
+        }
+        updateTotalCalories();
+      }
+    }
+
+    // Settings
+    function loadSettings() {
+      document.getElementById('targetWeightInput').value = appData.settings.targetWeight;
+      document.getElementById('targetCaloriesInput').value = appData.settings.targetCalories;
+      document.getElementById('startWeightInput').value = appData.settings.startWeight || '';
+      document.getElementById('currentWeightInput').value = appData.settings.currentWeight;
+      document.getElementById('targetCaloriesDisplay').textContent = appData.settings.targetCalories;
+    }
+
+    document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+      appData.settings.targetWeight = parseFloat(document.getElementById('targetWeightInput').value) || 65;
+      appData.settings.targetCalories = parseInt(document.getElementById('targetCaloriesInput').value) || 1800;
+      appData.settings.startWeight = parseFloat(document.getElementById('startWeightInput').value) || null;
+      appData.settings.currentWeight = parseFloat(document.getElementById('currentWeightInput').value) || 70;
+      saveData();
+      document.getElementById('targetCaloriesDisplay').textContent = appData.settings.targetCalories;
+      updateStreakDisplay();
+      showToast('設定を保存しました！');
+    });
+
+    // Export/Import (Text-based)
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const dataStr = JSON.stringify(appData, null, 2);
+      document.getElementById('backupTextarea').value = dataStr;
+      showToast('データを表示しました！');
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const textarea = document.getElementById('backupTextarea');
+      if (!textarea.value) {
+        document.getElementById('exportBtn').click();
+      }
+      textarea.select();
+      document.execCommand('copy');
+      showToast('コピーしました！');
+    });
+
+    document.getElementById('importBtn').addEventListener('click', () => {
+      const textarea = document.getElementById('backupTextarea');
+      const text = textarea.value.trim();
+      
+      if (!text) {
+        showToast('JSONデータを貼り付けてください');
+        return;
+      }
+
+      try {
+        const imported = JSON.parse(text);
+        if (imported.settings && imported.records) {
+          appData = imported;
+          // Ensure streaks structure exists
+          if (!appData.streaks.exercise) {
+            appData.streaks.exercise = { current: 0, best: 0 };
+          }
+          saveData();
+          loadTodayRecord();
+          loadSettings();
+          calculateStreaks();
+          showToast('データを復元しました！');
+        } else {
+          showToast('無効なデータ形式です');
+        }
+      } catch (err) {
+        showToast('JSONの解析に失敗しました');
+      }
+    });
+
+    // History
+    function renderHistory() {
+      const list = document.getElementById('historyList');
+      const dates = Object.keys(appData.records).sort().reverse();
+
+      if (dates.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">📝</div>
+            <p>まだ記録がありません</p>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = dates.slice(0, 30).map(date => {
+        const r = appData.records[date];
+        const totalCal = (r.meals?.breakfast || 0) + (r.meals?.lunch || 0) + 
+                        (r.meals?.dinner || 0) + (r.meals?.snack || 0);
+        const exercises = [];
+        if (r.exercise?.running) exercises.push(`🏃 ${r.exercise.runDistance}km`);
+        if (r.exercise?.workout) exercises.push('💪 筋トレ');
+
+        return `
+          <li class="history-item">
+            <div class="history-date">${formatDate(date)}</div>
+            <div class="history-stats">
+              ${r.weight ? `<span class="history-stat">⚖️ ${r.weight}kg</span>` : ''}
+              ${totalCal > 0 ? `<span class="history-stat">🍽️ ${totalCal}kcal</span>` : ''}
+              ${exercises.length > 0 ? `<span class="history-stat">${exercises.join(' ')}</span>` : ''}
+            </div>
+          </li>
+        `;
+      }).join('');
+    }
+
+    // Graph Drawing
+    function drawGraph(type) {
+      const canvas = document.getElementById('graphCanvas');
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+
+      canvas.width = canvas.offsetWidth * dpr;
+      canvas.height = canvas.offsetHeight * dpr;
+      ctx.scale(dpr, dpr);
+
+      const width = canvas.offsetWidth;
+      const height = canvas.offsetHeight;
+      const padding = { top: 20, right: 20, bottom: 30, left: 50 };
+
+      ctx.clearRect(0, 0, width, height);
+
+      const dates = Object.keys(appData.records).sort().slice(-30);
+      if (dates.length < 2) {
+        ctx.fillStyle = '#636E72';
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('データが不足しています', width / 2, height / 2);
+        return;
+      }
+
+      let data, targetValue, label, color;
+
+      if (type === 'weight') {
+        data = dates.map(d => appData.records[d].weight).filter(w => w);
+        targetValue = appData.settings.targetWeight;
+        label = 'kg';
+        color = '#FF8C42';
+      } else {
+        data = dates.map(d => {
+          const m = appData.records[d].meals;
+          return (m?.breakfast || 0) + (m?.lunch || 0) + (m?.dinner || 0) + (m?.snack || 0);
+        });
+        targetValue = appData.settings.targetCalories;
+        label = 'kcal';
+        color = '#4ECDC4';
+      }
+
+      if (data.length < 2) {
+        ctx.fillStyle = '#636E72';
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('データが不足しています', width / 2, height / 2);
+        return;
+      }
+
+      const minVal = Math.min(...data, targetValue) * 0.95;
+      const maxVal = Math.max(...data, targetValue) * 1.05;
+      const graphWidth = width - padding.left - padding.right;
+      const graphHeight = height - padding.top - padding.bottom;
+
+      // Draw grid
+      ctx.strokeStyle = '#E8E8E8';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const y = padding.top + (graphHeight / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(width - padding.right, y);
+        ctx.stroke();
+
+        const val = maxVal - ((maxVal - minVal) / 4) * i;
+        ctx.fillStyle = '#636E72';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(type === 'weight' ? val.toFixed(1) : Math.round(val), padding.left - 5, y + 4);
+      }
+
+      // Draw target line
+      const targetY = padding.top + graphHeight * (1 - (targetValue - minVal) / (maxVal - minVal));
+      ctx.strokeStyle = '#E17055';
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(padding.left, targetY);
+      ctx.lineTo(width - padding.right, targetY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Draw data
+      if (type === 'weight') {
+        // Line chart for weight
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+
+        data.forEach((val, i) => {
+          const x = padding.left + (graphWidth / (data.length - 1)) * i;
+          const y = padding.top + graphHeight * (1 - (val - minVal) / (maxVal - minVal));
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        // Draw points
+        data.forEach((val, i) => {
+          const x = padding.left + (graphWidth / (data.length - 1)) * i;
+          const y = padding.top + graphHeight * (1 - (val - minVal) / (maxVal - minVal));
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(x, y, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = 'white';
+          ctx.beginPath();
+          ctx.arc(x, y, 2, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      } else {
+        // Bar chart for calories
+        const barWidth = (graphWidth / data.length) * 0.7;
+        const barGap = (graphWidth / data.length) * 0.3;
+
+        data.forEach((val, i) => {
+          const x = padding.left + (graphWidth / data.length) * i + barGap / 2;
+          const barHeight = graphHeight * ((val - minVal) / (maxVal - minVal));
+          const y = padding.top + graphHeight - barHeight;
+
+          ctx.fillStyle = val > targetValue ? '#E17055' : color;
+          ctx.beginPath();
+          ctx.roundRect(x, y, barWidth, barHeight, 4);
+          ctx.fill();
+        });
+      }
+
+      // Draw label
+      ctx.fillStyle = '#636E72';
+      ctx.font = '11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`直近${data.length}日間 (目標: ${targetValue}${label})`, width / 2, height - 5);
+    }
+
+    // Initialize
+    function init() {
+      document.getElementById('currentDate').textContent = formatDate(getToday());
+      loadSettings();
+      loadTodayRecord();
+      calculateStreaks();
+    }
+
+    init();
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
+    }
+  </script>
+</body>
+</html>
