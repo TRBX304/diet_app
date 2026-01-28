@@ -560,6 +560,12 @@
       <div class="label">体重変化</div>
       <div class="best" id="startWeight">開始: --kg</div>
     </div>
+    <div class="streak-item">
+      <div class="icon">🎯</div>
+      <div class="count" id="weightToGoal">--</div>
+      <div class="label">目標まで</div>
+      <div class="best" id="targetWeightDisplay">目標: --kg</div>
+    </div>
   </div>
 
   <nav class="nav-tabs">
@@ -827,6 +833,7 @@
       // Weight change calculation
       const startWeight = appData.settings.startWeight;
       const currentWeight = getLatestWeight();
+      const targetWeight = appData.settings.targetWeight;
 
       if (startWeight && currentWeight) {
         const change = currentWeight - startWeight;
@@ -839,6 +846,19 @@
       }
 
       document.getElementById('startWeight').textContent = startWeight ? `開始: ${startWeight}kg` : '開始: --kg';
+
+      // Weight to goal calculation
+      if (targetWeight && currentWeight) {
+        const toGoal = currentWeight - targetWeight;
+        const sign = toGoal > 0 ? '+' : '';
+        const toGoalText = `${sign}${toGoal.toFixed(1)}`;
+        document.getElementById('weightToGoal').textContent = toGoalText;
+        document.getElementById('weightToGoal').style.color = toGoal <= 0 ? '#00B894' : '#E17055';
+      } else {
+        document.getElementById('weightToGoal').textContent = '--';
+      }
+
+      document.getElementById('targetWeightDisplay').textContent = targetWeight ? `目標: ${targetWeight}kg` : '目標: --kg';
     }
 
     // Tab Navigation
