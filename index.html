@@ -1236,12 +1236,50 @@
     }
 
     // Initialize
+    let lastDate = getToday();
+
     function init() {
       document.getElementById('currentDate').textContent = formatDate(getToday());
       loadSettings();
       loadTodayRecord();
       calculateStreaks();
     }
+
+    // Check if date changed (when app comes back from background)
+    function checkDateChange() {
+      const currentDate = getToday();
+      if (currentDate !== lastDate) {
+        lastDate = currentDate;
+        // Clear inputs for new day
+        document.getElementById('weightInput').value = '';
+        document.getElementById('breakfastInput').value = '';
+        document.getElementById('lunchInput').value = '';
+        document.getElementById('dinnerInput').value = '';
+        document.getElementById('snackInput').value = '';
+        document.getElementById('runningCheck').checked = false;
+        document.getElementById('workoutCheck').checked = false;
+        document.getElementById('runDistanceInput').value = '';
+        document.getElementById('runCalories').textContent = '0';
+        document.getElementById('workoutNoteInput').value = '';
+        document.getElementById('runningDetails').classList.remove('show');
+        document.getElementById('workoutNote').classList.remove('show');
+        document.getElementById('totalCalories').textContent = '0';
+        
+        // Reload for new day
+        init();
+        showToast('日付が変わりました！');
+      }
+    }
+
+    // Check when page becomes visible (back from background)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        checkDateChange();
+      }
+    });
+
+    // Also check on focus (for desktop browsers)
+    window.addEventListener('focus', checkDateChange);
 
     init();
 
